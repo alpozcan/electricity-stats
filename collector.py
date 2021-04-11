@@ -32,7 +32,7 @@ def fetch():
 
   chunk.append(sample)
 
-def insert(chunk):
+def insert():
   columns = chunk[0].keys()
   values_list = [ tuple([sample[c] for c in columns]) for sample in chunk ]
   execute_values(db_cursor, f'INSERT INTO electricity ({",".join(columns)}) VALUES %s', values_list)
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     fetch()
 
     if len(chunk) == CHUNK_SIZE:
-      insert(chunk)
+      insert()
       chunk = []
 
     time.sleep(INTERVAL)
