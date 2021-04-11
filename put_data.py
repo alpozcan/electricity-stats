@@ -5,7 +5,7 @@ from psycopg2.extras import execute_values
 
 CHUNK_SIZE = 64
 INTERVAL = 10 # fetch interval in seconds
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.ERROR
 URL = 'http://inverter/solar_api/v1/GetPowerFlowRealtimeData.fcgi'
 
 logging.basicConfig(level=LOG_LEVEL)
