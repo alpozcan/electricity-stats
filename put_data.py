@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import requests, json, logging, time, psycopg2, signal, sys
-from psycopg2.extensions import AsIs
+from psycopg2.extras import execute_values
 
-CHUNK_SIZE = 16
+CHUNK_SIZE = 64
 INTERVAL = 10 # fetch interval in seconds
 LOG_LEVEL = logging.DEBUG
 URL = 'http://inverter/solar_api/v1/GetPowerFlowRealtimeData.fcgi'
@@ -16,7 +16,11 @@ db_cursor = db_conn.cursor()
 chunk = []
 
 def fetch():
-  resp = requests.get(url=URL).json()
+  try:
+    resp = requests.get(url=URL).json()
+  except:
+    logging.error('error fetching data')
+    return
 
   sample = {}
   sample['time'] = int(time.time())
@@ -29,20 +33,14 @@ def fetch():
   chunk.append(sample)
 
 def insert(chunk):
-  insert_statement = 'insert into electricity (%s) values %s'
   columns = chunk[0].keys()
-
-  for sample in chunk:
-    values = [sample[c] for c in columns]
-    sql = db_cursor.mogrify(insert_statement, (AsIs(','.join(columns)), tuple(values)))
-    db_cursor.execute(sql)
-
+  values_list = [ tuple([sample[c] for c in columns]) for sample in chunk ]
+  execute_values(db_cursor, f'INSERT INTO electricity ({",".join(columns)}) VALUES %s', values_list)
   db_conn.commit()
   logging.info('inserted %d samples', len(chunk))
 
-
-def exit_handler():
-  logger.warning('Exiting on signal')
+def exit_handler(signal_received, frame):
+  logging.warning('Exiting on signal')
   db_conn.close()
   sys.exit(0)
 
