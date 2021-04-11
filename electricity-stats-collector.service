@@ -1,0 +1,9 @@
+[Unit]
+Description=Electricity Usage Statistics Collector for Fronius Primo
+
+[Service]
+ExecStart=/usr/bin/python3 /home/a/Code/electricity-stats/collector.py
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
