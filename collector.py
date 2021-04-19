@@ -16,11 +16,7 @@ db_cursor = db_conn.cursor()
 chunk = []
 
 def fetch():
-  try:
-    resp = requests.get(url=URL).json()
-  except:
-    logging.error('error fetching data')
-    return
+  resp = requests.get(url=URL).json()
 
   sample = {}
   sample['time'] = int(time.time())
@@ -48,7 +44,10 @@ if __name__ == "__main__":
   signal.signal(signal.SIGINT, exit_handler)
 
   while True:
-    fetch()
+    try:
+      fetch()
+    except:
+      logging.error('error fetching data')
 
     if len(chunk) == CHUNK_SIZE:
       insert()
