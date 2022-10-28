@@ -37,6 +37,7 @@ def insert():
 
 def exit_handler(signal_received, frame):
   logging.warning('Exiting on signal')
+  if len(chunk) > 0: insert()
   db_conn.close()
   sys.exit(0)
 
